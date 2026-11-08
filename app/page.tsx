@@ -1,69 +1,119 @@
-import Image from "next/image";
+import { site } from "@/data/site";
+import { listings } from "@/data/listings";
+import { Preloader } from "@/components/sections/Preloader";
+import { Navbar } from "@/components/sections/Navbar";
+import { Hero } from "@/components/sections/Hero";
+import { FeaturedListings } from "@/components/sections/FeaturedListings";
+import { Services } from "@/components/sections/Services";
+import { Stats } from "@/components/sections/Stats";
+import { Neighbourhoods } from "@/components/sections/Neighbourhoods";
+import { MortgageCalculator } from "@/components/sections/MortgageCalculator";
+import { About } from "@/components/sections/About";
+import { Testimonials } from "@/components/sections/Testimonials";
+import { Contact } from "@/components/sections/Contact";
+import { Footer } from "@/components/sections/Footer";
+import { Divider } from "@/components/ui/Divider";
+
+/**
+ * Structured data so search engines understand this is an estate agency
+ * with a real address and a real catalogue, rather than a generic page.
+ */
+function StructuredData() {
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "RealEstateAgent",
+    name: site.legalName,
+    alternateName: site.name,
+    description: site.shortPitch,
+    url: site.url,
+    telephone: site.contact.phone,
+    email: site.contact.email,
+    founder: { "@type": "Person", name: site.principal },
+    foundingDate: "2014",
+    areaServed: ["New Cairo", "Sheikh Zayed", "Zamalek", "Maadi", "New Administrative Capital", "Madinaty"],
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: site.contact.address,
+      addressLocality: "New Cairo",
+      addressRegion: "Cairo Governorate",
+      addressCountry: "EG",
+    },
+    openingHours: "Su-Th 10:00-19:00",
+    sameAs: site.socials.map((social) => social.href),
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: "4.9",
+      reviewCount: "128",
+    },
+    makesOffer: listings.slice(0, 6).map((listing) => ({
+      "@type": "Offer",
+      name: listing.title,
+      priceCurrency: "EGP",
+      price: listing.price,
+      availability: "https://schema.org/InStock",
+      category: listing.status === "rent" ? "Rental" : "Sale",
+    })),
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      // Serialised from a literal we control — no user input reaches this.
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+    />
+  );
+}
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <>
+      <StructuredData />
+
+      {/* 1. Branded intro, wipes away into the hero */}
+      <Preloader />
+
+      {/* 2. Navigation */}
+      <Navbar />
+
+      <main id="main">
+        {/* 3. Hero with quick search */}
+        <Hero />
+
+        {/* 4. Featured listings + the filterable grid */}
+        <FeaturedListings />
+
+        <div className="mx-auto max-w-[115rem] px-[var(--gutter)]">
+          <Divider className="my-[var(--section-y)]" />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* 5. Services */}
+        <Services />
+
+        {/* 6. Stats / why choose us, closing on the neighbourhood marquee */}
+        <Stats />
+
+        {/* 7. Interactive district map */}
+        <Neighbourhoods />
+
+        <div className="mx-auto max-w-[115rem] px-[var(--gutter)]">
+          <Divider />
         </div>
+
+        {/* 8. Mortgage calculator */}
+        <MortgageCalculator />
+
+        {/* 9. About, staging comparison and the team */}
+        <About />
+
+        {/* 10. Testimonials */}
+        <Testimonials />
+
+        {/* 11. Contact */}
+        <Contact />
       </main>
-    </div>
+
+      {/* 12. Footer */}
+      <Footer />
+    </>
   );
 }

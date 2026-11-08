@@ -1,26 +1,331 @@
 @import "tailwindcss";
 
+/* ============================================================
+   AM GROUP — DESIGN TOKENS
+   "Cinematic Portfolio": obsidian canvas, champagne-gold accent.
+   Change these six colours and the whole site re-skins.
+   ============================================================ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --obsidian: #0a0a0b; /* page base */
+  --graphite: #141416; /* raised surfaces, modals */
+  --ink: #1c1c1f; /* hairlines, inset wells */
+  --gold: #c9a227; /* accent, rules, active states */
+  --champagne: #e8d5a3; /* gradient top end, hover */
+  --bone: #f4f1ea; /* primary text */
+  --stone: #8a867e; /* muted text, labels */
+
+  /* Derived */
+  --hairline: color-mix(in srgb, var(--bone) 12%, transparent);
+  --hairline-strong: color-mix(in srgb, var(--bone) 22%, transparent);
+
+  /* Layout rhythm */
+  --gutter: clamp(1.25rem, 5vw, 6rem);
+  --section-y: clamp(5rem, 12vh, 10rem);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-obsidian: var(--obsidian);
+  --color-graphite: var(--graphite);
+  --color-ink: var(--ink);
+  --color-gold: var(--gold);
+  --color-champagne: var(--champagne);
+  --color-bone: var(--bone);
+  --color-stone: var(--stone);
+
+  --font-display: var(--font-instrument-serif), ui-serif, Georgia, serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ============================================================
+   BASE
+   ============================================================ */
+* {
+  min-width: 0;
+}
+
+html {
+  /* Lenis drives scrolling; native smooth-scroll would fight it. */
+  scroll-behavior: auto;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--obsidian);
+  color: var(--bone);
+  font-family: var(--font-sans);
+  font-synthesis-weight: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--gold);
+  color: var(--obsidian);
+}
+
+/* Visible, on-brand focus ring for keyboard users only. */
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* ============================================================
+   LENIS
+   ============================================================ */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* ============================================================
+   TYPOGRAPHY PRIMITIVES
+   ============================================================ */
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+}
+
+/* 11px uppercase micro-label — the main source of the editorial feel. */
+.label {
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-weight: 500;
+  color: var(--stone);
+}
+
+/* Masked line used by the split-text reveal: children translate up from
+   behind this overflow boundary.
+   `inline-block`, not `block`: these wrap individual WORDS, so block would
+   put every word on its own line. It also has to be set here rather than
+   left to Tailwind's utility — both are single-class selectors, and this
+   file is imported after the utilities, so it would win either way. */
+.line-mask {
+  display: inline-block;
+  overflow: hidden;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+/* Applied per split unit, not to the line as a whole: background-clip:text
+   does not paint through transformed children, and every split unit carries
+   a transform. A near-vertical angle keeps the ramp consistent letter to
+   letter, so a word still reads as one gradient. */
+.gold-gradient {
+  background: linear-gradient(170deg, var(--champagne) 0%, var(--gold) 62%, #9c7c18 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hairline-t {
+  border-top: 1px solid var(--hairline);
+}
+
+.film-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Hide the native cursor only where we actually draw a custom one. */
+@media (hover: hover) and (pointer: fine) {
+  body[data-custom-cursor="on"],
+  body[data-custom-cursor="on"] * {
+    cursor: none;
+  }
+}
+
+/* Range inputs are restyled from scratch in the mortgage calculator. */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--bone);
+  border: 3px solid var(--gold);
+  cursor: grab;
+  margin-top: -9px;
+  transition: transform 0.18s var(--ease-out-expo), box-shadow 0.18s ease;
+}
+
+input[type="range"]:hover::-webkit-slider-thumb {
+  transform: scale(1.18);
+  box-shadow: 0 0 0 8px color-mix(in srgb, var(--gold) 18%, transparent);
+}
+
+input[type="range"]:active::-webkit-slider-thumb {
+  cursor: grabbing;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--ink);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--bone);
+  border: 3px solid var(--gold);
+  cursor: grab;
+}
+
+input[type="range"]::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--ink);
+}
+
+/* Marquee — pure CSS so it costs no JS frame budget. */
+@keyframes marquee-x {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.marquee-track {
+  animation: marquee-x var(--marquee-duration, 40s) linear infinite;
+  will-change: transform;
+}
+
+.marquee-track[data-reverse="true"] {
+  animation-direction: reverse;
+}
+
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* Shimmer placeholder behind images while they decode. */
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.img-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--graphite) 0%,
+    color-mix(in srgb, var(--bone) 6%, var(--graphite)) 50%,
+    var(--graphite) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+/* ============================================================
+   REDUCED MOTION
+   Every decorative animation collapses; content stays fully legible.
+   JS also reads the same query and skips timelines entirely.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .marquee-track {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .img-skeleton {
+    animation: none !important;
+  }
+
+  body[data-custom-cursor="on"],
+  body[data-custom-cursor="on"] * {
+    cursor: auto !important;
+  }
+}
+
+/* ============================================================
+   HERO ATMOSPHERE
+   Slow-drifting colour field behind the hero headline.
+   ============================================================ */
+@keyframes aurora-drift {
+  0% {
+    transform: translate3d(-6%, -4%, 0) scale(1.05) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(6%, 5%, 0) scale(1.18) rotate(8deg);
+  }
+  100% {
+    transform: translate3d(-6%, -4%, 0) scale(1.05) rotate(0deg);
+  }
+}
+
+.aurora {
+  background:
+    radial-gradient(42% 46% at 22% 32%, color-mix(in srgb, var(--gold) 26%, transparent) 0%, transparent 62%),
+    radial-gradient(38% 42% at 78% 26%, color-mix(in srgb, #3c5a86 34%, transparent) 0%, transparent 64%),
+    radial-gradient(46% 48% at 56% 82%, color-mix(in srgb, var(--champagne) 16%, transparent) 0%, transparent 66%);
+  filter: blur(42px);
+  animation: aurora-drift 26s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -16px, 0);
+  }
+}
+
+.float-slow {
+  animation: float-y 7s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora,
+  .float-slow {
+    animation: none !important;
+  }
 }
